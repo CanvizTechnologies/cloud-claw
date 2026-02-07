@@ -1,8 +1,8 @@
 # Cloud Claw (Cloudflare + OpenClaw)
 
-**Cloud Claw** 是一个结合了 Cloudflare 强大基础设施与 OpenClaw 智能能力的容器化 AI 助手解决方案。
+**Cloud Claw** 是一个在 Cloudflare Workers + Containers 上运行 [OpenClaw](https://github.com/openclaw/openclaw) 的容器化 AI 助手。
 
-这是一个基于 Cloudflare Workers 和 Cloudflare Containers 的 TypeScript 项目。它利用 Cloudflare 的基础设施来运行和管理容器化工作负载。
+Worker 负责路由和认证，将请求转发到运行 OpenClaw 网关实例的单例容器，并通过 Cloudflare Browser Rendering 代理 Chrome DevTools Protocol (CDP) 会话。
 
 [English](README.md) | 简体中文
 
@@ -14,6 +14,7 @@
 - **语言**: TypeScript (ES2024)
 - **包管理器**: pnpm
 - **容器规格**: 1 vCPU, 4GB RAM, 8GB 磁盘
+- **浏览器**: Cloudflare Browser Rendering（远程 CDP）
 - **核心库**:
   - `cloudflare:workers`: Workers 标准库
   - `@cloudflare/containers`: 容器管理
@@ -73,10 +74,12 @@ pnpm deploy
 ```
 .
 ├── src/
-│   ├── index.ts        # Workers 入口文件 (ExportedHandler)
-│   └── container.ts    # AgentContainer 类定义 (继承自 Container)
-├── worker-configuration.d.ts # 自动生成的环境绑定类型
-├── wrangler.jsonc      # Wrangler 配置文件
+│   ├── index.ts        # Workers 入口，路由，基本认证
+│   ├── container.ts    # AgentContainer 类（继承自 Container），WebSocket 网关
+│   └── cdp.ts          # Chrome DevTools Protocol 代理（分块二进制 WebSocket 帧）
+├── Dockerfile          # 容器镜像：OpenClaw 网关 + TigrisFS S3 挂载
+├── worker-configuration.d.ts # 自动生成的 Cloudflare 绑定类型（请勿编辑）
+├── wrangler.jsonc      # Wrangler 配置（容器、绑定、部署区域）
 ├── tsconfig.json       # TypeScript 配置
 └── package.json
 ```
@@ -100,6 +103,7 @@ pnpm deploy
 | `S3_PREFIX`              | 存储桶内的路径前缀（子目录）             | ❌ 否    | (根目录) |
 | `TIGRISFS_ARGS`          | 传递给 TigrisFS 的额外挂载参数           | ❌ 否    | -        |
 | `OPENCLAW_GATEWAY_TOKEN` | Gateway 访问令牌（用于 Web UI 连接验证） | ✅ 是    | -        |
+| `WORKER_URL`             | Worker 公开 URL（用于 CDP 代理配置）     | ✅ 是    | -        |
 
 ### 工作原理
 
@@ -114,6 +118,26 @@ pnpm deploy
 
 首次启动后，OpenClaw 需要通过 Web UI 进行初始化配置。
 请访问部署后的 URL（例如 `https://your-worker.workers.dev`），按照屏幕提示完成设置。
+
+## 🌐 浏览器渲染（CDP 代理）
+
+Cloud Claw 集成了 [Cloudflare Browser Rendering](https://developers.cloudflare.com/browser-rendering/)，通过 Chrome DevTools Protocol (CDP) 为 AI 助手提供无头浏览器功能。
+
+### 工作原理
+
+1. **OpenClaw** 通过 WebSocket 连接到 Worker 的 CDP 代理端点（`/cloudflare.browser/{token}`）。
+2. **Worker** 从 Cloudflare Browser Rendering API 获取浏览器会话，并在 OpenClaw 和远程浏览器之间代理 CDP 消息。
+3. **二进制帧**：CDP 消息使用 4 字节长度头进行分块，以处理 Cloudflare WebSocket 基础设施上的大负载。
+
+### 配置
+
+设置 `WORKER_URL` 和 `OPENCLAW_GATEWAY_TOKEN` 后，CDP 代理会自动配置。OpenClaw 容器会生成指向以下地址的浏览器配置：
+
+```
+{WORKER_URL}/cloudflare.browser/{OPENCLAW_GATEWAY_TOKEN}
+```
+
+认证通过 URL 路径中的令牌完成，无需额外配置。
 
 ## ⏰ 容器生命周期
 

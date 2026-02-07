@@ -1,4 +1,5 @@
 import { env } from 'cloudflare:workers'
+import { proxyCdp } from './cdp'
 import { forwardRequestToContainer } from './container'
 
 export { AgentContainer } from './container'
@@ -30,6 +31,20 @@ function verifyBasicAuth(request: Request): Response | null {
 }
 
 async function handleFetch(request: Request) {
+  const url = new URL(request.url)
+
+  // /cloudflare.browser/{token} — token auth via URL path
+  const browserMatch = url.pathname.match(/^\/cloudflare\.browser\/([^/]+)(.*)/)
+  if (browserMatch) {
+    const [, token] = browserMatch
+    if (!env.OPENCLAW_GATEWAY_TOKEN || token !== env.OPENCLAW_GATEWAY_TOKEN) {
+      return new Response('Unauthorized', { status: 401 })
+    }
+    const host = request.headers.get('Host') || url.host
+    return proxyCdp(env.BROWSER, request, `${url.protocol}//${host}`, token)
+  }
+
+  // All other paths use Basic Auth
   const authError = verifyBasicAuth(request)
   if (authError) {
     return authError

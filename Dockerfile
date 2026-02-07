@@ -119,6 +119,21 @@ if [ ! -f "$OPENCLAW_STATE_DIR/openclaw.json" ]; then
     "controlUi": {
       "allowInsecureAuth": true
     }
+  },
+  "browser": {
+    "enabled": true,
+    "evaluateEnabled": true,
+    "remoteCdpTimeoutMs": 120000,
+    "remoteCdpHandshakeTimeoutMs": 60000,
+    "attachOnly": true,
+    "defaultProfile": "cloudflare",
+    "profiles": {
+      "cloudflare": {
+        "cdpUrl": "${WORKER_URL}/cloudflare.browser/${OPENCLAW_GATEWAY_TOKEN}",
+        "driver": "clawd",
+        "color": "#FF4500"
+      }
+    }
   }
 }
 EOFCONFIG

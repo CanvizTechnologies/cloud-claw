@@ -1,8 +1,8 @@
 # Cloud Claw (Cloudflare + OpenClaw)
 
-**Cloud Claw** is a containerized AI assistant solution that combines Cloudflare's powerful infrastructure with OpenClaw's intelligent capabilities.
+**Cloud Claw** is a containerized AI assistant that runs [OpenClaw](https://github.com/openclaw/openclaw) on Cloudflare Workers + Containers. 
 
-This is a TypeScript project based on Cloudflare Workers and Cloudflare Containers. It leverages Cloudflare's infrastructure to run and manage containerized workloads.
+A Worker handles routing and auth, forwards requests to a singleton container running an OpenClaw gateway instance, and proxies Chrome DevTools Protocol (CDP) sessions via Cloudflare Browser Rendering.
 
 English | [简体中文](README.zh-CN.md)
 
@@ -14,6 +14,7 @@ English | [简体中文](README.zh-CN.md)
 - **Language**: TypeScript (ES2024)
 - **Package Manager**: pnpm
 - **Container Specs**: 1 vCPU, 4GB RAM, 8GB disk
+- **Browser**: Cloudflare Browser Rendering (remote CDP)
 - **Core Libraries**:
   - `cloudflare:workers`: Workers standard library
   - `@cloudflare/containers`: Container management
@@ -73,10 +74,12 @@ pnpm deploy
 ```
 .
 ├── src/
-│   ├── index.ts        # Workers entry file (ExportedHandler)
-│   └── container.ts    # AgentContainer class definition (extends Container)
-├── worker-configuration.d.ts # Auto-generated environment binding types
-├── wrangler.jsonc      # Wrangler configuration file
+│   ├── index.ts        # Workers entry point, routing, basic auth
+│   ├── container.ts    # AgentContainer class (extends Container), WebSocket gateway
+│   └── cdp.ts          # Chrome DevTools Protocol proxy (chunked binary WebSocket framing)
+├── Dockerfile          # Container image: OpenClaw gateway + TigrisFS S3 mount
+├── worker-configuration.d.ts # Auto-generated Cloudflare binding types (DO NOT EDIT)
+├── wrangler.jsonc      # Wrangler configuration (containers, bindings, placement)
 ├── tsconfig.json       # TypeScript configuration
 └── package.json
 ```
@@ -100,6 +103,7 @@ To enable data persistence, configure the following environment variables in the
 | `S3_PREFIX`              | Path prefix within the bucket (subdirectory)     | No       | (root)  |
 | `TIGRISFS_ARGS`          | Additional mount arguments for TigrisFS          | No       | -       |
 | `OPENCLAW_GATEWAY_TOKEN` | Gateway access token (for Web UI authentication) | Yes      | -       |
+| `WORKER_URL`             | Worker's public URL (for CDP proxy config)       | Yes      | -       |
 
 ### How It Works
 
@@ -114,6 +118,26 @@ To enable data persistence, configure the following environment variables in the
 
 After the first startup, OpenClaw needs to be initialized via the Web UI.
 Visit the deployed URL (e.g., `https://your-worker.workers.dev`) and follow the on-screen instructions to complete setup.
+
+## Browser Rendering (CDP Proxy)
+
+Cloud Claw integrates [Cloudflare Browser Rendering](https://developers.cloudflare.com/browser-rendering/) to provide headless browser capabilities to the AI assistant via the Chrome DevTools Protocol (CDP).
+
+### How It Works
+
+1. **OpenClaw** connects to the Worker's CDP proxy endpoint (`/cloudflare.browser/{token}`) using WebSocket.
+2. **The Worker** acquires a browser session from Cloudflare's Browser Rendering API and proxies CDP messages between OpenClaw and the remote browser.
+3. **Binary framing**: CDP messages are chunked with a 4-byte length header to handle large payloads over Cloudflare's WebSocket infrastructure.
+
+### Configuration
+
+The CDP proxy is automatically configured when `WORKER_URL` and `OPENCLAW_GATEWAY_TOKEN` are set. The OpenClaw container generates a browser profile pointing to:
+
+```
+{WORKER_URL}/cloudflare.browser/{OPENCLAW_GATEWAY_TOKEN}
+```
+
+Authentication is handled via the token in the URL path — no additional setup required.
 
 ## Container Lifecycle
 
